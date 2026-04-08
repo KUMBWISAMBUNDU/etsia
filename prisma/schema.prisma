@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Roles utilisateurs
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DRIVER
+  CLIENT
+}
+
+// Statut du chauffeur
+enum DriverStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id          String   @id @default(uuid())
+  firebaseUid String   @unique
+  email       String   @unique
+  name        String
+  role        Role     @default(CLIENT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relation avec Driver
+  driver Driver?
+
+  // Relations avec Review et Report
+  reviews Review[]
+  reports Report[]
+
+  // Relation avec les Drivers qu'un admin a validé
+  driversValidated Driver[] @relation("AdminValidation")
+}
+
+model Driver {
+  id            String       @id @default(uuid())
+  userId        String       @unique
+  licenseNumber String
+  vehicleInfo   String
+  qrCode        String?
+  status        DriverStatus @default(PENDING)
+  validatedById String?
+
+  // Relations
+  user        User  @relation(fields: [userId], references: [id])
+  validatedBy User? @relation("AdminValidation", fields: [validatedById], references: [id])
+
+  reviews Review[]
+  reports Report[]
+
+  createdAt DateTime @default(now())
+}
+
+model Community {
+  id        String   @id @default(uuid())
+  name      String
+  city      String
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id       String  @id @default(uuid())
+  rating   Int
+  comment  String?
+  userId   String
+  driverId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([driverId])
+}
+
+model Report {
+  id       String @id @default(uuid())
+  reason   String
+  userId   String
+  driverId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([driverId])
+}
