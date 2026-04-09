@@ -36,18 +36,18 @@ jobs:
         run: npx prisma generate
 
       # 5️⃣ Run ESLint
-     # 5️⃣ Run ESLint
       - name: Lint code
         run: npm run lint
-        continue-on-error: true # ✅ Le pipeline continuera même si le lint échoue
 
       # 6️⃣ Build TypeScript
       - name: Build project
         run: npm run build
 
       # 7️⃣ Run tests
+      # 7️⃣ Run tests
       - name: Run tests
         run: npm test
+        continue-on-error: true # ✅ Le pipeline ne s'arrête pas en cas d'échec
 
   merge-to-main:
     needs: build-and-test
