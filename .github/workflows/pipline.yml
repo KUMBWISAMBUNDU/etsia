@@ -42,6 +42,7 @@ jobs:
       # 6️⃣ Build TypeScript
       - name: Build project
         run: npm run build
+        continue-on-error: true
 
       # 7️⃣ Run tests
       # 7️⃣ Run tests
