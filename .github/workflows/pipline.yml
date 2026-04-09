@@ -54,26 +54,23 @@ jobs:
   merge-to-main:
     needs: build-and-test
     runs-on: ubuntu-latest
-    # Correction : On utilise base_ref pour détecter la branche cible 'review'
+    # On change github.ref par github.base_ref pour cibler la branche de destination
     if: github.event_name == 'pull_request' && github.base_ref == 'review'
     steps:
-      # 1️⃣ Checkout avec historique complet
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Nécessaire pour fusionner deux branches différentes
+          fetch-depth: 0 # Récupère tout l'historique pour éviter l'erreur de merge
 
-      # 2️⃣ Configuration Git
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # 3️⃣ Merge et Push
       - name: Merge review into main
         run: |
           git fetch origin main review
           git checkout main
-          # On fusionne la branche distante 'review' dans 'main'
+          # On fusionne le contenu de 'review' qui vient d'être testé
           git merge --no-ff origin/review -m "chore: merge review into main via CI"
           git push origin main
